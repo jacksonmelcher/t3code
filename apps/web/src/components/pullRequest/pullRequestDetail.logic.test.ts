@@ -39,6 +39,7 @@ import {
   resolveBaseFreshness,
   buildPullRequestTimeline,
   editPullRequestThreadComment,
+  firstVisibleThreadCommentIds,
   writePullRequestDetailSnapshot,
 } from "./pullRequestDetail.logic";
 import type { ReviewCommentContext } from "~/reviewCommentContext";
@@ -112,6 +113,20 @@ describe("pull request activity refresh", () => {
   });
 });
 describe("review thread comment pages", () => {
+  it("assigns thread actions to only the first visible comment in each conversation", () => {
+    const firstThread = { id: "t1" };
+    const secondThread = { id: "t2" };
+    const threads = new Map([
+      ["c1", firstThread],
+      ["c2", firstThread],
+      ["c3", secondThread],
+    ]);
+
+    expect([
+      ...firstVisibleThreadCommentIds([{ id: "c2" }, { id: "c1" }, { id: "c3" }], threads),
+    ]).toEqual(["c2", "c3"]);
+  });
+
   it("appends new comments once and keeps refreshed base comments", () => {
     expect(
       mergePullRequestThreadComments(
